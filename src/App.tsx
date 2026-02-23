@@ -9,6 +9,7 @@ import {
   Minus, 
   Trash2, 
   ChevronRight,
+  ChevronDown,
   Filter,
   Package,
   BookOpen,
@@ -32,6 +33,7 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'figura' | 'comic'>('all');
   const [subcategoryFilter, setSubcategoryFilter] = useState<'all' | 'dc' | 'marvel' | 'starwars' | 'lego' | 'anime'>('all');
+  const [isSubcategoryOpen, setIsSubcategoryOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [needsShipping, setNeedsShipping] = useState(false);
 
@@ -197,12 +199,12 @@ export default function App() {
 
       {/* Products Grid */}
       <main className="max-w-7xl mx-auto px-4 pb-32">
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
           <h2 className="text-3xl font-bold uppercase tracking-tight flex items-center gap-3">
             <Filter className="w-6 h-6 text-venom-green" />
-            Catálogo <span className="text-white/20">/ {filter === 'all' ? 'Todos' : filter === 'figura' ? 'Figuras' : 'Cómics'}</span>
+            Catálogo <span className="text-white/20 hidden sm:inline">/ {filter === 'all' ? 'Todos' : filter === 'figura' ? 'Figuras' : 'Cómics'}</span>
           </h2>
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
             {['all', 'figura', 'comic'].map((f) => (
               <button
                 key={f}
@@ -224,32 +226,63 @@ export default function App() {
         <AnimatePresence>
           {filter === 'figura' && (
             <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="flex flex-wrap gap-2 mb-12 overflow-hidden"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-12 relative z-20"
             >
-              {[
-                { id: 'all', label: 'Todas' },
-                { id: 'dc', label: 'DC' },
-                { id: 'marvel', label: 'Marvel' },
-                { id: 'starwars', label: 'Star Wars' },
-                { id: 'lego', label: 'Lego' },
-                { id: 'anime', label: 'Anime' }
-              ].map((sub) => (
-                <button
-                  key={sub.id}
-                  onClick={() => setSubcategoryFilter(sub.id as any)}
-                  className={cn(
-                    "px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border",
-                    subcategoryFilter === sub.id 
-                      ? "bg-venom-green/20 border-venom-green text-venom-green" 
-                      : "bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white"
-                  )}
-                >
-                  {sub.label}
-                </button>
-              ))}
+              <div className="flex flex-col gap-2 max-w-[240px]">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-venom-green ml-1">Universo</label>
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsSubcategoryOpen(!isSubcategoryOpen)}
+                    className="w-full bg-venom-muted border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between text-xs font-bold uppercase tracking-widest hover:border-venom-green/30 transition-all"
+                  >
+                    <span>
+                      {subcategoryFilter === 'all' ? 'Todas las Marcas' : 
+                       subcategoryFilter === 'starwars' ? 'Star Wars' : 
+                       subcategoryFilter.toUpperCase()}
+                    </span>
+                    <ChevronDown className={cn("w-4 h-4 text-venom-green transition-transform", isSubcategoryOpen && "rotate-180")} />
+                  </button>
+                  
+                  <AnimatePresence>
+                    {isSubcategoryOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                        className="absolute top-full left-0 right-0 mt-2 bg-venom-muted border border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl z-30"
+                      >
+                        {[
+                          { id: 'all', label: 'Todas las Marcas' },
+                          { id: 'dc', label: 'DC Comics' },
+                          { id: 'marvel', label: 'Marvel' },
+                          { id: 'starwars', label: 'Star Wars' },
+                          { id: 'lego', label: 'Lego' },
+                          { id: 'anime', label: 'Anime' }
+                        ].map((sub) => (
+                          <button
+                            key={sub.id}
+                            onClick={() => {
+                              setSubcategoryFilter(sub.id as any);
+                              setIsSubcategoryOpen(false);
+                            }}
+                            className={cn(
+                              "w-full px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest transition-colors border-b border-white/5 last:border-0",
+                              subcategoryFilter === sub.id 
+                                ? "bg-venom-green text-black" 
+                                : "hover:bg-white/5 text-white/60 hover:text-white"
+                            )}
+                          >
+                            {sub.label}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
